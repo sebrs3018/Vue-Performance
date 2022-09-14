@@ -1,21 +1,16 @@
 module.exports = {
-  chainWebpack: (config) => {
-    config.module
-      .rule("vue")
-      .use("vue-loader")
-      .tap((options) => {
-        // modify the options...
-        console.log(options);
-        return options;
-      });
-  },
   pages: {
-    manage: {
-      entry: "src/main.js",
-      template: "public/index.html",
-      filename: "index.html",
+    index: {
+      entry: "src/main.js" /* js entry point */,
+      template: "public/index.html" /* html template entry point */,
+      filename: "index.html" /* output name of the file */,
       title: "My optimization page",
-      chunks: ["chunk-vendors", "chunk-common", "manage"],
+    },
+    profile: {
+      entry: "src/scripts/profile.js" /* js entry point */,
+      template: "public/profile.html" /* html template entry point */,
+      filename: "profile.html" /* output name of the file */,
+      title: "My profile",
     },
   },
   configureWebpack: {
