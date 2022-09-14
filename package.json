@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve --mode development",
     "serve-prod": "SET NODE_OPTIONS=--openssl-legacy-provider && workbox generateSW workbox-config.js && vue-cli-service serve --mode production",
-    "build": "vue-cli-service build",
+    "build": "workbox generateSW workbox-config.js && vue-cli-service build",
     "http-server": "cd ./dist && http-server --gzip",
     "lint": "vue-cli-service lint"
   },
