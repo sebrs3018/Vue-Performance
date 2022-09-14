@@ -7,10 +7,14 @@
     "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve --mode development",
     "serve-prod": "SET NODE_OPTIONS=--openssl-legacy-provider && workbox generateSW workbox-config.js && vue-cli-service serve --mode production",
     "build": "vue-cli-service build",
+    "http-server": "cd ./dist && http-server --gzip",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "express": "^4.18.1",
+    "http2": "^3.3.7",
+    "spdy": "^4.0.2",
     "vue": "^2.6.11"
   },
   "devDependencies": {
@@ -25,7 +29,6 @@
     "prettier": "^1.19.1",
     "vue-template-compiler": "^2.6.11"
   },
-
   "postcss": {
     "plugins": {
       "autoprefixer": {}

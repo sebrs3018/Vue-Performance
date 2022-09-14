@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import LoadingComponent from "./components/LoadingComponent.vue";
 import ErrorComponent from "./components/ErrorComponent.vue";
 export default {
@@ -23,7 +24,9 @@ export default {
       // It is interesting to notice that, whenever the timeout is exceeded, the default component won't be shown and vue will throw a warning!
       timeout: 500,
     }),
-    "success-modal": () => import("./components/SuccesModal.vue"),
+    "success-modal": defineAsyncComponent(() =>
+      import("./components/SuccesModal.vue")
+    ),
   },
   data: () => ({
     status: null,
