@@ -1,37 +1,25 @@
 <template>
   <div id="app">
-    HOME PAGE!
-    <modal-regular v-if="status === true" />
-    <success-modal v-else-if="status === false" />
+    <success-modal v-if="success === true" />
+    <button @click="success = true">click me!</button>
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
-import LoadingComponent from "./components/LoadingComponent.vue";
-import ErrorComponent from "./components/ErrorComponent.vue";
-export default {
+<script lang="ts">
+import { defineComponent, defineAsyncComponent } from "vue";
+export default defineComponent({
   name: "App",
   components: {
-    "modal-regular": () => ({
-      /* Lazy loading the component. I could be cool to use prefetching but, unfortunately, safari does not support it... */
-      component: import("./components/ModalRegular.vue"),
-      loading: LoadingComponent,
-      error: ErrorComponent,
-      /* By default the delay time before showing the loading component is 200ms */
-      delay: 100,
-      // Whenever the timeout is exceeded, the errorComponent will be shown!. The default timeout time is INFINITY
-      // It is interesting to notice that, whenever the timeout is exceeded, the default component won't be shown and vue will throw a warning!
-      timeout: 500,
-    }),
     "success-modal": defineAsyncComponent(() =>
       import("./components/SuccesModal.vue")
     ),
   },
-  data: () => ({
-    status: null,
-  }),
-};
+  data() {
+    return {
+      success: null,
+    } as { success: boolean | null };
+  },
+});
 </script>
 
 <style></style>

@@ -9,6 +9,7 @@
             <template #observable>
               <!-- <base-box v-if="isVisible" /> -->
               <img
+                v-if="isVisible"
                 src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
               />
             </template>
@@ -21,9 +22,9 @@
 <script>
 import IntersectionObserver from "../components/IntersectionObserver.vue";
 import IntersectionObservable from "../components/IntersectionObservable.vue";
-import { defineAsyncComponent } from "vue";
+import { defineAsyncComponent, defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "Profile",
   components: {
     IntersectionObserver,
@@ -35,5 +36,5 @@ export default {
       isVisible: false,
     };
   },
-};
+});
 </script>

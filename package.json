@@ -5,10 +5,10 @@
   "description": "Vue.js example starter project",
   "scripts": {
     "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve --mode development",
-    "serve-prod": "SET NODE_OPTIONS=--openssl-legacy-provider && workbox generateSW workbox-config.js && vue-cli-service serve --mode production",
     "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
     "http-server": "cd ./dist && http-server --gzip",
-    "lint": "vue-cli-service lint"
+    "serve-prod": "SET NODE_OPTIONS=--openssl-legacy-provider && workbox generateSW workbox-config.js && vue-cli-service serve --mode production"
   },
   "dependencies": {
     "core-js": "^3.8.3",
@@ -18,15 +18,20 @@
     "vue": "^2.6.11"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-plugin-typescript": "~5.0.0",
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-prettier": "^5.0.0",
+    "@vue/eslint-config-typescript": "^9.1.0",
     "babel-eslint": "^10.0.3",
     "eslint": "^8.23.0",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-vue": "^9.4.0",
     "prettier": "^1.19.1",
+    "typescript": "~4.5.5",
     "vue-template-compiler": "^2.6.11"
   },
   "postcss": {

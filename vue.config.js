@@ -1,13 +1,13 @@
 module.exports = {
   pages: {
     index: {
-      entry: "src/main.js" /* js entry point */,
+      entry: "src/main.ts" /* js entry point */,
       template: "public/index.html" /* html template entry point */,
       filename: "index.html" /* output name of the file */,
       title: "My optimization page",
     },
     profile: {
-      entry: "src/scripts/profile.js" /* js entry point */,
+      entry: "src/scripts/profile.ts" /* js entry point */,
       template: "public/profile.html" /* html template entry point */,
       filename: "profile.html" /* output name of the file */,
       title: "My profile",
