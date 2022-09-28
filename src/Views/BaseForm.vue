@@ -19,6 +19,7 @@ const { formGroup, validate } = useValidator(
 );
 
 const { firstName } = formGroup;
+console.log({ firstName });
 
 const submitValue = () => {
   // v$.value.$validate();
@@ -28,7 +29,7 @@ const submitValue = () => {
 </script>
 <template>
   <div>
-    <BaseCheckbox v-model="firstName.value" validator="">
+    <BaseCheckbox v-model="firstName.value" :validator="firstName.validator">
       <template #label> Accetta trattamento dei dati personali </template>
     </BaseCheckbox>
     <button @click="submitValue">submit form</button>

@@ -26,9 +26,10 @@ interface ExtendedReactive<T>
 
 interface ReactiveValue<T> {
   value: T;
-  hasError: boolean;
+  //hasError: boolean;
+
   //TODO: tipare questo validatore per bene (bisogna estendere predicateEntry)
-  validator: PredicateEntry<T>;
+  validator: PredicateEntryExtended<T>;
 }
 
 type ToValidate<T> = {
@@ -48,6 +49,9 @@ type Predicates<T> = {
   [K in keyof T]: PredicateValue<T>;
 };
 type PredicateEntry<T> = Predicates<T>[keyof T];
+type PredicateEntryExtended<T> = PredicateEntry<T> & {
+  $error: boolean;
+};
 
 export default function <T extends Record<string, unknown>>(
   plainObjToValidate: T,
@@ -65,21 +69,21 @@ export default function <T extends Record<string, unknown>>(
     const value = plainObjToValidate[key];
     const entry = reactive({
       value,
-      hasError: false,
-      validator: predicates[key],
+      validator: { ...predicates[key], $error: false },
     });
     //Setting an inner watcher to check the predicate...
     watch(
       () => entry.value,
       (prev, cur) => {
-        console.log("innerWatcher", { prev, cur });
+        // console.log("innerWatcher", { prev, cur });
         let res = /*predicates[key](cur)*/ callPredicates(
           key,
           cur as T[keyof T]
         );
 
-        console.log("innerWatcher", { [key]: res });
-        entry.hasError = res;
+        // console.log("innerWatcher", { [key]: res });
+        //entry.$error = res;
+        entry.validator.$error = res;
       }
     );
 
@@ -117,7 +121,8 @@ export default function <T extends Record<string, unknown>>(
       //In case the result of the predicate is falsy, then the global state of the validation will be false
       if (isValid && !predRes) isValid = false;
 
-      elemToValidate.hasError = predRes;
+      //elemToValidate.hasError = predRes;
+      elemToValidate.validator.$error = predRes;
     }
 
     return isValid;

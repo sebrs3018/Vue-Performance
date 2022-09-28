@@ -31,12 +31,14 @@ const emits = defineEmits<{
 //const checkboxValue = ref(false);
 
 onBeforeMount(() => {
+  console.log(props.validator);
   //Syncing the prop starter value with the inner component value
   //checkboxValue.value = props.value;
 });
 
 function hasError() {
-  return props.validator?.error;
+  console.log("BasCheckbox registere a validation erro1x");
+  return props.validator?.$error;
 }
 const required = () => !!props.validator?.required;
 
