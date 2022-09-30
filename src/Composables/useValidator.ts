@@ -19,22 +19,20 @@ interface Person {
   name: string;
 }
 
-interface ExtendedReactive<T>
-  extends UnwrapNestedRefs<ReactiveValue<T[keyof T]>> {
-  validator: any;
-}
-
-interface ReactiveValue<T> {
-  value: T;
+interface ReactiveValue<T, TKey extends keyof T> {
+  value: T[TKey];
   //hasError: boolean;
 
   //TODO: tipare questo validatore per bene (bisogna estendere predicateEntry)
-  validator: PredicateEntryExtended<T>;
+  validator: PredicateEntryExtended<T, TKey>;
 }
 
+type ToValidateEntry<T, K extends keyof T> = UnwrapNestedRefs<
+  ReactiveValue<T, K>
+>;
 type ToValidate<T> = {
   //[K in keyof T]: ExtendedRef<T[K]>;
-  [K in keyof T]: UnwrapNestedRefs<ReactiveValue<T[K]>>;
+  [K in keyof T]: ToValidateEntry<T, K>;
 };
 
 interface UsableValidator<T> {
@@ -42,14 +40,17 @@ interface UsableValidator<T> {
   validate: () => boolean;
 }
 
-type PredicateValue<T> = {
-  [predKey: string]: (val: T[keyof T]) => boolean;
+/* IN Predicates */
+type PredicateValue<TValue> = {
+  [predKey: string]: (val: TValue) => boolean;
 };
 type Predicates<T> = {
-  [K in keyof T]: PredicateValue<T>;
+  [K in keyof T]: PredicateValue<T[K]>;
 };
-type PredicateEntry<T> = Predicates<T>[keyof T];
-type PredicateEntryExtended<T> = PredicateEntry<T> & {
+/* OUT Predicates */
+type PredicateEntry<T, K extends keyof T> = Predicates<T>[K];
+type PredicateEntryExtended<T, K extends keyof T> = PredicateEntry<T, K> & {
+  /** This value is null in only during the initialization period! */
   $error: boolean;
 };
 
@@ -69,20 +70,20 @@ export default function <T extends Record<string, unknown>>(
     const value = plainObjToValidate[key];
     const entry = reactive({
       value,
-      validator: { ...predicates[key], $error: false },
+      validator: {
+        ...predicates[key],
+        $error: false,
+      } as PredicateEntryExtended<T, typeof key>,
     });
+
     //Setting an inner watcher to check the predicate...
     watch(
       () => entry.value,
-      (prev, cur) => {
-        // console.log("innerWatcher", { prev, cur });
-        let res = /*predicates[key](cur)*/ callPredicates(
-          key,
-          cur as T[keyof T]
-        );
+      (cur, prev) => {
+        //console.log("innerWatcher", { prev, cur });
+        let res = callPredicates(key, cur as T[keyof T]);
 
-        // console.log("innerWatcher", { [key]: res });
-        //entry.$error = res;
+        //console.log(`innerWatcher, ${key} has error? ${res}`);
         entry.validator.$error = res;
       }
     );
@@ -104,6 +105,7 @@ export default function <T extends Record<string, unknown>>(
     const n_predicate = predicates[k];
     for (const keyPredicate in n_predicate) {
       const predicate = n_predicate[keyPredicate];
+      //console.log("calling predicates with the following values", predicate);
       if (!predicate(v)) {
         return false;
       }
@@ -112,20 +114,18 @@ export default function <T extends Record<string, unknown>>(
   };
 
   const validate = (): boolean => {
-    let isValid = true;
-
     for (const key in formGroup) {
       const elemToValidate = formGroup[key];
-      const predRes = callPredicates(key, elemToValidate.value as T[keyof T]);
+      const predRes = !callPredicates(key, elemToValidate.value as T[keyof T]);
 
       //In case the result of the predicate is falsy, then the global state of the validation will be false
-      if (isValid && !predRes) isValid = false;
+      if (!predRes) return false;
 
       //elemToValidate.hasError = predRes;
       elemToValidate.validator.$error = predRes;
     }
 
-    return isValid;
+    return true;
   };
 
   return { formGroup, validate };

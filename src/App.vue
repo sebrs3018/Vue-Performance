@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <success-modal v-if="success === true" />
-    <button @click="success = true">click me!</button>
+    <!-- <success-modal v-if="success === true" />
+    <button @click="success = true">click me!</button> -->
     <BaseForm />
   </div>
 </template>

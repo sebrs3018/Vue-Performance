@@ -37,13 +37,14 @@ onBeforeMount(() => {
 });
 
 function hasError() {
-  console.log("BasCheckbox registere a validation erro1x");
-  return props.validator?.$error;
+  const res = props.validator?.$error;
+  res && console.log("BaseCheckbox registered an error (validator)");
+  return res;
 }
 const required = () => !!props.validator?.required;
 
 function handleChange(event: Event) {
-  console.log("handleChanging and sending...", { val: props.value });
+  //console.log("handleChanging and sending...", { val: props.value });
   //Toggling!
   //checkboxValue.value = !checkboxValue.value;
   emits("input", !props.value);

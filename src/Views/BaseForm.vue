@@ -2,34 +2,51 @@
 import { reactive, computed, ref } from "vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength } from "@vuelidate/validators";
-import BaseInput from "./BaseInput.vue";
+import cinput from "@/components/BaseComponents/cinput.vue";
 import useValidator from "@/Composables/useValidator";
 import BaseCheckbox from "@/components/BaseComponents/BaseCheckbox.vue";
 
 const { formGroup, validate } = useValidator(
   {
-    firstName: false,
+    firstName: "",
+    privacy: false,
   },
   {
     firstName: {
-      hasToBeTrue: (val: boolean) => val,
+      required: (val: string) => {
+        console.log(`firstname required validator input: ${val}`);
+        return val.trim().length === 0;
+      },
+    },
+    privacy: {
+      hasToBeTrue: (val: boolean) => !val,
       required: (val: boolean) => true,
     },
   }
 );
 
-const { firstName } = formGroup;
-console.log({ firstName });
+const { privacy, firstName } = formGroup;
+console.log({ privacy, firstName });
 
 const submitValue = () => {
   // v$.value.$validate();
   const isFormValid = validate();
-  console.log({ isFormValid });
+  !isFormValid && console.log("The submitted form is not valid");
 };
 </script>
 <template>
   <div>
-    <BaseCheckbox v-model="firstName.value" :validator="firstName.validator">
+    <cinput
+      name="name"
+      :validator="firstName.validator"
+      v-model="firstName.value"
+      label="Firstname"
+      type="text"
+      placeholder="Insert a name please"
+      :on-keyup-enter-clear="false"
+      :readonly="false"
+    />
+    <BaseCheckbox v-model="privacy.value" :validator="privacy.validator">
       <template #label> Accetta trattamento dei dati personali </template>
     </BaseCheckbox>
     <button @click="submitValue">submit form</button>
