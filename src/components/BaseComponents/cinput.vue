@@ -210,10 +210,9 @@ export default {
       if (this.validator?.$params)
         return this.validator?.$params?.required ?? false;
 
-      console.log("getRequired", {
-        name: this.name,
-        validator: this.validator,
-      });
+      console.log(
+        `is the field ${this.label} required? ${!!this.validator?.required}`
+      );
       //New Vuelidate API
       return !!this.validator?.required;
     },

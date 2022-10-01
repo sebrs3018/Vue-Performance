@@ -1,31 +1,27 @@
 <script lang="ts" setup>
 import { reactive, computed, ref } from "vue";
 import { useVuelidate } from "@vuelidate/core";
-import { required, minLength } from "@vuelidate/validators";
+//import { required, minLength } from "@vuelidate/validators";
 import cinput from "@/components/BaseComponents/cinput.vue";
 import useValidator from "@/Composables/useValidator";
 import BaseCheckbox from "@/components/BaseComponents/BaseCheckbox.vue";
-
-const { formGroup, validate } = useValidator(
+import { required } from "@/Composables/ValidatorHelpers";
+const { firstName, privacy, validate } = useValidator(
   {
     firstName: "",
     privacy: false,
   },
   {
     firstName: {
-      required: (val: string) => {
-        console.log(`firstname required validator input: ${val}`);
-        return val.trim().length === 0;
-      },
+      required,
     },
     privacy: {
-      hasToBeTrue: (val: boolean) => !val,
-      required: (val: boolean) => true,
+      hasToBeTrue: (val: boolean) => val,
+      required,
     },
   }
 );
 
-const { privacy, firstName } = formGroup;
 console.log({ privacy, firstName });
 
 const submitValue = () => {

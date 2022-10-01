@@ -21,9 +21,6 @@ interface Person {
 
 interface ReactiveValue<T, TKey extends keyof T> {
   value: T[TKey];
-  //hasError: boolean;
-
-  //TODO: tipare questo validatore per bene (bisogna estendere predicateEntry)
   validator: PredicateEntryExtended<T, TKey>;
 }
 
@@ -35,10 +32,10 @@ type ToValidate<T> = {
   [K in keyof T]: ToValidateEntry<T, K>;
 };
 
-interface UsableValidator<T> {
-  formGroup: ToValidate<T>;
+type UsableValidator<T> = ToValidate<T> & {
+  //formGroup: ToValidate<T>;
   validate: () => boolean;
-}
+};
 
 /* IN Predicates */
 type PredicateValue<TValue> = {
@@ -61,7 +58,7 @@ export default function <T extends Record<string, unknown>>(
   if (!plainObjToValidate || !predicates)
     return {
       validate: (): boolean => false,
-      formGroup: {} as ToValidate<T>,
+      ...({} as ToValidate<T>),
     };
 
   let _formGroup: any;
@@ -84,7 +81,7 @@ export default function <T extends Record<string, unknown>>(
         let res = callPredicates(key, cur as T[keyof T]);
 
         //console.log(`innerWatcher, ${key} has error? ${res}`);
-        entry.validator.$error = res;
+        entry.validator.$error = !res;
       }
     );
 
@@ -115,18 +112,17 @@ export default function <T extends Record<string, unknown>>(
 
   const validate = (): boolean => {
     for (const key in formGroup) {
-      const elemToValidate = formGroup[key];
-      const predRes = !callPredicates(key, elemToValidate.value as T[keyof T]);
+      const { [key]: elemToValidate } = formGroup;
+      const predRes = callPredicates(key, elemToValidate.value as T[keyof T]);
 
       //In case the result of the predicate is falsy, then the global state of the validation will be false
       if (!predRes) return false;
 
-      //elemToValidate.hasError = predRes;
-      elemToValidate.validator.$error = predRes;
+      elemToValidate.validator.$error = !predRes;
     }
 
     return true;
   };
 
-  return { formGroup, validate };
+  return { ...formGroup, validate };
 }
