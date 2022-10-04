@@ -67,6 +67,7 @@ const pp: ToValidate<{
 
 type UsableValidator<T> = ToValidate<T> & {
   validate: () => boolean | null;
+  getUpdatedObjToValidate: () => T;
 };
 
 /* IN Predicates */
@@ -170,6 +171,7 @@ export default function <T extends Record<string, unknown>>(
   if (!plainObjToValidate || !predicates)
     return {
       validate: (): boolean => false,
+      getUpdatedObjToValidate: () => ({} as T),
       ...({} as ToValidate<T>),
     };
 
@@ -248,7 +250,10 @@ export default function <T extends Record<string, unknown>>(
     return validateAux(formGroup);
   };
 
-  return { ...formGroup, validate };
+  const getUpdatedObjToValidate = (): T =>
+    getUpdatedObjToValidateAux(formGroup) as T;
+
+  return { ...formGroup, validate, getUpdatedObjToValidate };
 }
 
 const isLeaf = (leaf: any) =>
@@ -310,6 +315,20 @@ function validateAux(node: any, initResult = { result: true }): boolean | null {
 
   return initResult.result;
 }
+
+const getUpdatedObjToValidateAux = (node: any) => {
+  if (node.value !== undefined) {
+    return node.value;
+  }
+
+  let plainSubTree: any = {};
+  for (let key in node) {
+    const val = getUpdatedObjToValidateAux(node[key]);
+    plainSubTree[key] = val;
+  }
+
+  return plainSubTree;
+};
 
 const visitTree = (objToVisit: any, predicates: any) => {
   let finalRes: any = {};

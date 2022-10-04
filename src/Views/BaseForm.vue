@@ -4,7 +4,7 @@ import useValidator from "@/Composables/useValidator";
 import BaseCheckbox from "@/components/BaseComponents/BaseCheckbox.vue";
 import { required, email, phone } from "@/Composables/ValidatorHelpers";
 
-const { requestData, validate } = useValidator(
+const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
     requestData: {
       firstName: "",
@@ -49,7 +49,8 @@ const { requestData, validate } = useValidator(
   }
 );
 
-console.log(requestData);
+console.log({ requestData, ObjToValidate: getUpdatedObjToValidate() });
+
 const submitValue = () => {
   const isFormValid = validate();
   console.log({ isFormValid });
