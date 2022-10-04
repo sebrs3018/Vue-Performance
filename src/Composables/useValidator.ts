@@ -1,15 +1,4 @@
-import { ref, Ref, reactive, watch, UnwrapNestedRefs, TrackOpTypes } from "vue";
-// type Pick<T, K extends keyof T> = {
-//   [P in K]: T[P];
-// };
-// type PickEntry<T, K extends keyof T> = {
-//   [P in K]: Ref<Entry<T[P]>>;
-// };
-
-// interface ExtendedRef<T> {
-//   refVal: Ref<T>;
-//   hasError: boolean;
-// }
+import { ref, Ref, reactive, watch, UnwrapNestedRefs, shallowRef } from "vue";
 interface Person {
   name: string;
 }
@@ -78,7 +67,10 @@ type UsableValidator<T> = ToValidate<T> & {
 // };
 
 type PredicateValueEntry<T, TKey extends keyof T> = {
-  [predKey: string]: ((value: T[TKey]) => boolean) | boolean | undefined;
+  [predKey: string]:
+    | ((value: T[TKey], validatorState?: any) => boolean)
+    | boolean
+    | undefined;
 };
 interface PredicateValueEntryExt<T, TKey extends keyof T>
   extends PredicateValueEntry<T, TKey> {
@@ -175,85 +167,26 @@ export default function <T extends Record<string, unknown>>(
       ...({} as ToValidate<T>),
     };
 
-  let _formGroup: any;
-  //Initializing an array of reactive objects to validate
-  // for (const key in plainObjToValidate) {
-  //   const value = plainObjToValidate[key];
-
+  let formGroup = shallowRef<ToValidate<T> | null>(null);
   let finalRes: any = {};
   for (const key in plainObjToValidate) {
     finalRes[key] = initValidationTree(
       plainObjToValidate[key],
-      predicates[key]
+      predicates[key],
+      formGroup
     );
   }
-  console.log(finalRes);
-  _formGroup = finalRes;
 
-  // const entry = reactive({
-  //   value,
-  //   validator: {
-  //     ...predicates[key],
-  //     $error: false,
-  //   } as PredicateEntryExtended<T, typeof key>,
-  // });
-
-  //Setting an inner watcher to check the predicate...
-  // watch(
-  //   () => entry.value,
-  //   (cur, prev) => {
-  //     //console.log("innerWatcher", { prev, cur });
-  //     let res = callPredicates(key, cur as T[keyof T]);
-
-  //     //console.log(`innerWatcher, ${key} has error? ${res}`);
-  //     entry.validator.$error = !res;
-  //   }
-  // );
-
-  // if (!_formGroup)
-  //   _formGroup = {
-  //     [key]: entry,
-  //   };
-  // else _formGroup[key] = entry;
-  // }
-  const formGroup: ToValidate<T> = _formGroup;
-
-  /**
-   * Calls all the predicates of a given entry
-   */
-  const callPredicates = (k: keyof T, v: T[keyof T]) => {
-    //Retrieving the predicate object which contains all the predicates to
-    //mark as valid the entry
-    const n_predicate = predicates[k];
-    for (const keyPredicate in n_predicate) {
-      const predicate = n_predicate[keyPredicate];
-      //console.log("calling predicates with the following values", predicate);
-      // if (!predicate(v)) {
-      //   return false;
-      // }
-    }
-    return true;
-  };
+  formGroup.value = finalRes;
 
   const validate = (): boolean | null => {
-    // for (const key in formGroup) {
-    //   const { [key]: elemToValidate } = formGroup;
-    //   const predRes = callPredicates(key, elemToValidate.value as T[keyof T]);
-
-    //   //In case the result of the predicate is falsy, then the global state of the validation will be false
-    //   if (!predRes) return false;
-
-    //   elemToValidate.validator.$error = !predRes;
-    // }
-
-    // return true;
-    return validateAux(formGroup);
+    return validateAux(formGroup.value);
   };
 
   const getUpdatedObjToValidate = (): T =>
-    getUpdatedObjToValidateAux(formGroup) as T;
+    getUpdatedObjToValidateAux(formGroup.value) as T;
 
-  return { ...formGroup, validate, getUpdatedObjToValidate };
+  return { ...(formGroup.value as any), validate, getUpdatedObjToValidate };
 }
 
 const isLeaf = (leaf: any) =>
@@ -261,13 +194,26 @@ const isLeaf = (leaf: any) =>
   typeof leaf === "string" ||
   typeof leaf === "boolean";
 
-const initValidationTree = (obj: any, predicates: any): any => {
+const initValidationTree = (
+  obj: any,
+  predicates: any,
+  validatorState: any
+): any => {
   if (isLeaf(obj)) {
+    let wrappedPredicates: any = {};
+
+    for (let predKey in predicates) {
+      wrappedPredicates[predKey] = (leafValue: any) =>
+        predicates[predKey](leafValue, validatorState.value);
+    }
+
+    console.log("wrapped predicates ", wrappedPredicates);
+
     let res = reactive({
       value: obj,
       validator: {
         $error: false,
-        ...predicates,
+        ...wrappedPredicates,
       },
     });
 
@@ -275,8 +221,8 @@ const initValidationTree = (obj: any, predicates: any): any => {
       () => res.value,
       (curVal) => {
         let predResult = true;
-        for (let key in predicates) {
-          if (!predicates[key](curVal)) {
+        for (let key in wrappedPredicates) {
+          if (!wrappedPredicates[key](curVal)) {
             predResult = false;
             break;
           }
@@ -290,7 +236,7 @@ const initValidationTree = (obj: any, predicates: any): any => {
 
   let result: any = {};
   for (const key in obj) {
-    const leaf = initValidationTree(obj[key], predicates[key]);
+    const leaf = initValidationTree(obj[key], predicates[key], validatorState);
     result[key] = leaf;
   }
 
@@ -330,10 +276,10 @@ const getUpdatedObjToValidateAux = (node: any) => {
   return plainSubTree;
 };
 
-const visitTree = (objToVisit: any, predicates: any) => {
-  let finalRes: any = {};
-  for (const key in objToVisit) {
-    finalRes[key] = initValidationTree(objToVisit[key], predicates[key]);
-  }
-  return finalRes;
-};
+// const visitTree = (objToVisit: any, predicates: any) => {
+//   let finalRes: any = {};
+//   for (const key in objToVisit) {
+//     finalRes[key] = initValidationTree(objToVisit[key], predicates[key]);
+//   }
+//   return finalRes;
+// };

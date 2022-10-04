@@ -22,6 +22,13 @@ const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
     requestData: {
       userPhone: {
+        trial: (value, { requestData }) => {
+          console.log("calling the trial!", {
+            value,
+            uEmail: requestData.userEmail.value,
+          });
+          return true;
+        },
         phone,
       },
       userEmail: {
