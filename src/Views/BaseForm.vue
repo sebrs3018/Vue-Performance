@@ -11,6 +11,12 @@ const { requestData, validate } = useValidator(
       privacy: false,
       userEmail: "",
       userPhone: "",
+      birthPlace: {
+        city: {
+          zip: 0,
+          country: "",
+        },
+      },
     },
   },
   {
@@ -28,6 +34,16 @@ const { requestData, validate } = useValidator(
       privacy: {
         hasToBeTrue: (val: boolean) => val,
         required,
+      },
+      birthPlace: {
+        city: {
+          zip: {
+            greaterThanZero: (val) => val > 0,
+          },
+          country: {
+            required,
+          },
+        },
       },
     },
   }
@@ -70,6 +86,27 @@ const submitValue = () => {
       v-model="requestData.userPhone.value"
       label="Phone"
       placeholder="Insert Phone"
+      :on-keyup-enter-clear="false"
+      :readonly="false"
+    />
+    <cinput
+      type="text"
+      name="country"
+      :validator="requestData.birthPlace.city.country.validator"
+      v-model="requestData.birthPlace.city.country.value"
+      label="Country"
+      placeholder="Insert Country"
+      :on-keyup-enter-clear="false"
+      :readonly="false"
+    />
+
+    <cinput
+      type="text"
+      name="zip"
+      :validator="requestData.birthPlace.city.zip.validator"
+      v-model="requestData.birthPlace.city.zip.value"
+      label="Zip"
+      placeholder="Insert Zip"
       :on-keyup-enter-clear="false"
       :readonly="false"
     />

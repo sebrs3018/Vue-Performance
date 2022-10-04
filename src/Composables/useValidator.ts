@@ -76,11 +76,17 @@ type UsableValidator<T> = ToValidate<T> & {
 //     : (value: T[TKey]) => boolean;
 // };
 
+type PredicateValueEntry<T, TKey extends keyof T> = {
+  [predKey: string]: ((value: T[TKey]) => boolean) | boolean | undefined;
+};
+interface PredicateValueEntryExt<T, TKey extends keyof T>
+  extends PredicateValueEntry<T, TKey> {
+  $error?: boolean;
+}
+
 type PredicateValue<T, TKey extends keyof T> = T[TKey] extends object
   ? Predicates<T[TKey]>
-  : {
-      [predKey: string]: (value: T[TKey]) => boolean;
-    } & { $error?: boolean };
+  : PredicateValueEntryExt<T, TKey>;
 
 type Predicates<T> = {
   [K in keyof T]: PredicateValue<T, K>;

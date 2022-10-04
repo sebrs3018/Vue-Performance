@@ -4,7 +4,7 @@
   "private": true,
   "description": "Vue.js example starter project",
   "scripts": {
-    "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve --mode development --port 3000",
+    "serve": "vue-cli-service serve --mode development --port 3000",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "http-server": "cd ./dist && http-server --gzip",
