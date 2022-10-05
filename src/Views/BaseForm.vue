@@ -27,8 +27,11 @@ const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
     requestData: {
       userPhone: {
-        trial: (v, v1) => requiredIf(() => v1?.requestData.privacy),
-        phone,
+        trial: requiredIf((_validator) => {
+          console.log({ _validator });
+          return _validator.requestData.privacy.validator.$error as boolean;
+        }),
+        //phone,
       },
       userEmail: {
         required,

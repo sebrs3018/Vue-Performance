@@ -68,11 +68,7 @@ type UsableValidator<T> = ToValidate<T> & {
 
 type PredicateValueEntry<TRoot, T, TKey extends keyof T> = {
   [predKey: string]:
-    | ((
-        value: T[TKey],
-        validatorState?: ToValidate<TRoot>,
-        getter?: (validatorToExplore?: any) => any
-      ) => boolean)
+    | ((value: T[TKey], validatorState?: ToValidate<TRoot>) => boolean)
     | boolean
     | undefined;
 };
@@ -222,7 +218,7 @@ const initValidationTree = (
     let res = reactive({
       value: obj,
       validator: {
-        $error: false,
+        $error: undefined,
         ...wrappedPredicates,
       },
     });

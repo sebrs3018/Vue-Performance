@@ -33,10 +33,13 @@ export const required = (value: any) => {
 // else return false;
 //};
 
-export const requiredIf = (getter: any) => {
-  const res = getter();
-  if (res.validator.$error) return true;
-  else return required(res.value);
+export const requiredIf = (getter: (validator: any) => any): any => {
+  return (v: any, v1: any) => {
+    const depResultHasError = getter(v1);
+    if (depResultHasError === false || depResultHasError === undefined)
+      return true;
+    return required(v);
+  };
 };
 
 /** Email validation via regex. In case the provided value is empty, it will be evauluated as valid */
