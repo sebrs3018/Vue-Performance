@@ -2,7 +2,12 @@
 import cinput from "@/components/BaseComponents/cinput.vue";
 import useValidator from "@/Composables/useValidator";
 import BaseCheckbox from "@/components/BaseComponents/BaseCheckbox.vue";
-import { required, email, phone } from "@/Composables/ValidatorHelpers";
+import {
+  required,
+  requiredIf,
+  email,
+  phone,
+} from "@/Composables/ValidatorHelpers";
 
 const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
@@ -22,13 +27,7 @@ const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
     requestData: {
       userPhone: {
-        trial: (value, { requestData }) => {
-          console.log("calling the trial!", {
-            value,
-            uEmail: requestData.userEmail.value,
-          });
-          return true;
-        },
+        trial: (v, v1) => requiredIf(() => v1?.requestData.privacy),
         phone,
       },
       userEmail: {

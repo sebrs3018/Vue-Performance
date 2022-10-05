@@ -11,7 +11,7 @@ interface ExtendedPerson extends Person {
 
 interface ReactiveValue<T, TKey extends keyof T> {
   value: T[TKey];
-  validator: Predicates<T>[TKey];
+  validator: Predicates<T, T>[TKey];
 }
 
 // type ToValidateEntry<T, K extends keyof T> = UnwrapNestedRefs<
@@ -66,75 +66,83 @@ type UsableValidator<T> = ToValidate<T> & {
 //     : (value: T[TKey]) => boolean;
 // };
 
-type PredicateValueEntry<T, TKey extends keyof T> = {
+type PredicateValueEntry<TRoot, T, TKey extends keyof T> = {
   [predKey: string]:
-    | ((value: T[TKey], validatorState?: any) => boolean)
+    | ((
+        value: T[TKey],
+        validatorState?: ToValidate<TRoot>,
+        getter?: (validatorToExplore?: any) => any
+      ) => boolean)
     | boolean
     | undefined;
 };
-interface PredicateValueEntryExt<T, TKey extends keyof T>
-  extends PredicateValueEntry<T, TKey> {
+interface PredicateValueEntryExt<TRoot, T, TKey extends keyof T>
+  extends PredicateValueEntry<TRoot, T, TKey> {
   $error?: boolean;
 }
 
-type PredicateValue<T, TKey extends keyof T> = T[TKey] extends object
-  ? Predicates<T[TKey]>
-  : PredicateValueEntryExt<T, TKey>;
+type PredicateValue<TRoot, T, TKey extends keyof T> = T[TKey] extends object
+  ? Predicates<TRoot, T[TKey]>
+  : PredicateValueEntryExt<TRoot, T, TKey>;
 
-type Predicates<T> = {
-  [K in keyof T]: PredicateValue<T, K>;
+type Predicates<TRoot, T> = {
+  [K in keyof T]: PredicateValue<TRoot, T, K>;
 };
 
-const p: PredicateValue<
-  { name: string; city: { place: string; zip: string } },
-  "name"
-> = {
-  l1: (val) => true,
-};
-const p1: PredicateValue<
-  { name: string; city: { place: string; zip: string } },
-  "city"
-> = {
-  place: {
-    ll: (val: string) => true,
-  },
-  zip: {
-    ll: (val: string) => true,
-  },
-};
-const p0: Predicates<{ name: string; city: { place: string; zip: string } }> = {
-  name: {
-    l1: (val) => true,
-  },
-  city: {
-    place: {
-      l1: (val) => true,
-    },
-    zip: {
-      l1: (val) => true,
-    },
-  },
-};
+// const p: PredicateValue<
+//   { name: string; city: { place: string; zip: string } },
+//   "name"
+// > = {
+//   l1: (val) => true,
+// };
+// const p1: PredicateValue<
+//   { name: string; city: { place: string; zip: string } },
+//   "city"
+// > = {
+//   place: {
+//     ll: (val: string) => true,
+//   },
+//   zip: {
+//     ll: (val: string) => true,
+//   },
+// };
+// const p0: Predicates<{ name: string; city: { place: string; zip: string } }> = {
+//   name: {
+//     l1: (val) => true,
+//   },
+//   city: {
+//     place: {
+//       l1: (val) => true,
+//     },
+//     zip: {
+//       l1: (val) => true,
+//     },
+//   },
+// };
 
 /* OUT Predicates */
-type PredicateEntry<T, K extends keyof T> = Predicates<T>[K];
-const pEntry: PredicateEntry<
-  { name: string; city: { place: string; zip: string } },
-  "city"
-> = {
-  place: {
-    l1: (val) => true,
-  },
-  zip: {
-    l1: (val) => true,
-  },
-};
+type PredicateEntry<TRoot, T, K extends keyof T> = Predicates<TRoot, T>[K];
+// const pEntry: PredicateEntry<
+//   { name: string; city: { place: string; zip: string } },
+//   "city"
+// > = {
+//   place: {
+//     l1: (val) => true,
+//   },
+//   zip: {
+//     l1: (val) => true,
+//   },
+// };
 
 // type PredicateEntryExtended<T, K extends keyof T> = PredicateEntry<T, K> & {
 //   /** This value is null in only during the initialization period! */
 //   $error: boolean;
 // };
-type PredicateEntryExtended<T, K extends keyof T> = PredicateValue<T, K> & {
+type PredicateEntryExtended<TRoot, T, K extends keyof T> = PredicateValue<
+  TRoot,
+  T,
+  K
+> & {
   /** This value is null in only during the initialization period! */
   $error: boolean;
 };
@@ -158,7 +166,7 @@ type PredicateEntryExtended<T, K extends keyof T> = PredicateValue<T, K> & {
  */
 export default function <T extends Record<string, unknown>>(
   plainObjToValidate: T,
-  predicates: Predicates<T>
+  predicates: Predicates<T, T>
 ): UsableValidator<T> {
   if (!plainObjToValidate || !predicates)
     return {
@@ -186,7 +194,11 @@ export default function <T extends Record<string, unknown>>(
   const getUpdatedObjToValidate = (): T =>
     getUpdatedObjToValidateAux(formGroup.value) as T;
 
-  return { ...(formGroup.value as any), validate, getUpdatedObjToValidate };
+  return {
+    ...(formGroup.value as ToValidate<T>),
+    validate,
+    getUpdatedObjToValidate,
+  };
 }
 
 const isLeaf = (leaf: any) =>
@@ -206,8 +218,6 @@ const initValidationTree = (
       wrappedPredicates[predKey] = (leafValue: any) =>
         predicates[predKey](leafValue, validatorState.value);
     }
-
-    console.log("wrapped predicates ", wrappedPredicates);
 
     let res = reactive({
       value: obj,

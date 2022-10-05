@@ -25,6 +25,20 @@ export const required = (value: any) => {
 
   return `${value}`.trim().length > 0;
 };
+//export const requiredIf = (value: any, validator: any) => (getterFunc: () => any): boolean => {
+// const res = getterFunc();
+// console.log("getterFunc res", res);
+
+// if (!res.validator.$error) return required(res.value);
+// else return false;
+//};
+
+export const requiredIf = (getter: any) => {
+  const res = getter();
+  if (res.validator.$error) return true;
+  else return required(res.value);
+};
+
 /** Email validation via regex. In case the provided value is empty, it will be evauluated as valid */
 export const email = (value: string) => {
   if (value.length === 0) return true;
