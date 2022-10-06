@@ -1,3 +1,5 @@
+import { watch } from "vue";
+
 // eslint-disable-next-line
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/im;
@@ -34,10 +36,36 @@ export const required = (value: any) => {
 //};
 
 export const requiredIf = (getter: (validator: any) => any): any => {
+  let unwatchFunc: any = null;
+  let _reactiveFrom: any, _reactiveDep: any;
+
+  const decoratedGetter = (theValidator: any): any => {
+    //console.log("decoratedGetter", theValidator);
+    const { reactiveFrom, reactiveDep } = getter(theValidator);
+    _reactiveFrom = reactiveFrom;
+    _reactiveDep = reactiveDep;
+
+    //console.log({ reactiveFrom, reactiveDep });
+    //Called deferred
+    unwatchFunc = watch(
+      () => reactiveDep.validator.$error,
+      (newVal, oldVal) => {
+        //console.log("requiredIf watcher!!", { newVal, oldVal });
+        if (newVal) {
+          reactiveFrom.validator.$error = false;
+        } else {
+          console.log({ val: reactiveFrom.value });
+          reactiveFrom.validator.$error = !required(reactiveFrom.value);
+        }
+      }
+    );
+    return getter;
+  };
   return (v: any, v1: any) => {
-    const depResultHasError = getter(v1);
-    if (depResultHasError === false || depResultHasError === undefined)
-      return true;
+    unwatchFunc && unwatchFunc();
+    //Observing the dependency
+    decoratedGetter(v1);
+    if (_reactiveDep.validator.$error) return true;
     return required(v);
   };
 };

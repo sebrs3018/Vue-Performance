@@ -28,10 +28,18 @@ const { requestData, validate, getUpdatedObjToValidate } = useValidator(
     requestData: {
       userPhone: {
         trial: requiredIf((_validator) => {
-          console.log({ _validator });
-          return _validator.requestData.privacy.validator.$error as boolean;
+          return {
+            reactiveFrom: _validator.requestData.userPhone,
+            reactiveDep: _validator.requestData.privacy,
+          };
         }),
-        //phone,
+        immWatcher: {
+          predicate: () => true,
+          getters(vInstance: any) {
+            return vInstance.requestData.privacy;
+          },
+        },
+        phone,
       },
       userEmail: {
         required,

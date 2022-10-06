@@ -66,9 +66,15 @@ type UsableValidator<T> = ToValidate<T> & {
 //     : (value: T[TKey]) => boolean;
 // };
 
+type PredicateFunc<TRoot, T, TKey extends keyof T> = (
+  value: T[TKey],
+  validatorState?: ToValidate<TRoot>
+) => boolean;
+
 type PredicateValueEntry<TRoot, T, TKey extends keyof T> = {
   [predKey: string]:
-    | ((value: T[TKey], validatorState?: ToValidate<TRoot>) => boolean)
+    | PredicateFunc<TRoot, T, TKey>
+    | { getters: any; predicate: PredicateFunc<TRoot, T, TKey> }
     | boolean
     | undefined;
 };
@@ -211,8 +217,17 @@ const initValidationTree = (
     let wrappedPredicates: any = {};
 
     for (let predKey in predicates) {
-      wrappedPredicates[predKey] = (leafValue: any) =>
-        predicates[predKey](leafValue, validatorState.value);
+      if (typeof predicates[predKey] === "function") {
+        wrappedPredicates[predKey] = (leafValue: any) =>
+          predicates[predKey](leafValue, validatorState.value);
+      } else {
+        const { getters, predicate } = predicates[predKey];
+        watch(validatorState, (cur, prev) => {
+          console.log({ cur, prev });
+          const depRef = getters(cur);
+          console.log({ depRef });
+        });
+      }
     }
 
     let res = reactive({
