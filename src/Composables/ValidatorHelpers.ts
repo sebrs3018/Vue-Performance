@@ -70,6 +70,39 @@ export const requiredIf = (getter: (validator: any) => any): any => {
   };
 };
 
+export const requiredIf2 = (getter: (validator: any) => any): any => {
+  let unwatchFunc: any = null;
+  let _reactiveDep: any = null;
+  const decoratedGetter = (theValidator: any): any => {
+    const { reactiveFrom, reactiveDep } = getter(theValidator);
+    _reactiveDep = reactiveDep;
+    //Called deferred
+    unwatchFunc = watch(
+      () => reactiveDep.validator.$error,
+      (newVal, oldVal) => {
+        console.log("requiredDep has error?", { newVal, oldVal });
+        if (newVal) {
+          reactiveFrom.validator.$error = false;
+        } else {
+          reactiveFrom.validator.$error = !required(reactiveFrom.value);
+        }
+      }
+    );
+    return getter;
+  };
+  return (vInstance: any): any => {
+    console.log("requiredIf2 called!", { vInstance });
+    unwatchFunc && unwatchFunc();
+    //Observing the dependency
+    decoratedGetter(vInstance);
+
+    return (v: any, v1: any) => {
+      if (_reactiveDep.validator.$error) return true;
+      return required(v);
+    };
+  };
+};
+
 /** Email validation via regex. In case the provided value is empty, it will be evauluated as valid */
 export const email = (value: string) => {
   if (value.length === 0) return true;

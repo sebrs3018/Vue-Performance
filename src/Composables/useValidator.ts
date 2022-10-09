@@ -74,7 +74,11 @@ type PredicateFunc<TRoot, T, TKey extends keyof T> = (
 type PredicateValueEntry<TRoot, T, TKey extends keyof T> = {
   [predKey: string]:
     | PredicateFunc<TRoot, T, TKey>
-    | { getters: any; predicate: PredicateFunc<TRoot, T, TKey> }
+    | {
+        getters: any;
+        predicate: any;
+        validatorHelper: any;
+      }
     | boolean
     | undefined;
 };
@@ -221,11 +225,24 @@ const initValidationTree = (
         wrappedPredicates[predKey] = (leafValue: any) =>
           predicates[predKey](leafValue, validatorState.value);
       } else {
-        const { getters, predicate } = predicates[predKey];
+        const { getters, validatorHelper, predicate } = predicates[predKey];
+
+        console.log("not a function", {
+          getters,
+          validatorHelper,
+          predicate,
+          validatorState,
+        });
+        wrappedPredicates[predKey] = (leafValue: any) =>
+          predicate(leafValue, validatorState.value);
+
         watch(validatorState, (cur, prev) => {
           console.log({ cur, prev });
+
           const depRef = getters(cur);
           console.log({ depRef });
+          //Injecting the validator instance
+          validatorHelper(validatorState.value);
         });
       }
     }

@@ -5,6 +5,7 @@ import BaseCheckbox from "@/components/BaseComponents/BaseCheckbox.vue";
 import {
   required,
   requiredIf,
+  requiredIf2,
   email,
   phone,
 } from "@/Composables/ValidatorHelpers";
@@ -27,17 +28,34 @@ const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
     requestData: {
       userPhone: {
-        trial: requiredIf((_validator) => {
-          return {
-            reactiveFrom: _validator.requestData.userPhone,
-            reactiveDep: _validator.requestData.privacy,
-          };
-        }),
         immWatcher: {
-          predicate: () => true,
+          predicate: (v: any, v1: any): boolean => {
+            console.log("immWatcher called!", { v, v1 });
+            if (v1.requestData.privacy.validator.$error === undefined) {
+              const { privacy } = v1.requestData;
+              for (let key in privacy.validator) {
+                if (key === "$error") continue;
+                console.log(
+                  `dep: ${key} => hasError: ${!privacy.validator[key](
+                    privacy.value
+                  )}`
+                );
+                privacy.validator.$error = !privacy.validator[key](
+                  privacy.value
+                );
+                if (privacy.validator.$error) break;
+              }
+            } else if (v1.requestData.privacy.validator.$error) return true;
+            return required(v);
+          },
           getters(vInstance: any) {
+            console.log({ vInstance });
             return vInstance.requestData.privacy;
           },
+          validatorHelper: requiredIf2((_validator) => ({
+            reactiveFrom: _validator.requestData.userPhone,
+            reactiveDep: _validator.requestData.privacy,
+          })),
         },
         phone,
       },
