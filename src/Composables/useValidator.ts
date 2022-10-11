@@ -9,20 +9,25 @@ interface ExtendedPerson extends Person {
   };
 }
 
-interface ReactiveValue<T, TKey extends keyof T> {
+export interface ReactiveValue<T, TKey extends keyof T> {
   value: T[TKey];
-  validator: Predicates<T, T>[TKey];
+  validator: PredicateValueEntryExt<T, T, TKey>;
 }
 
 // type ToValidateEntry<T, K extends keyof T> = UnwrapNestedRefs<
 //   ReactiveValue<T, K>
 // >;
+export type ToValidateValue<T, K extends keyof T> = UnwrapNestedRefs<
+  ReactiveValue<T, K>
+>;
 
-type ToValidateEntry<T, K extends keyof T> = ToValidate<T[K]> extends object
+export type ToValidateEntry<T, K extends keyof T> = ToValidate<
+  T[K]
+> extends object
   ? ToValidate<T[K]>
-  : UnwrapNestedRefs<ReactiveValue<T, K>>;
+  : ToValidateValue<T, K>;
 
-type ToValidate<T> = {
+export type ToValidate<T> = {
   [K in keyof T]: ToValidateEntry<T, K>;
 };
 
@@ -65,24 +70,39 @@ type UsableValidator<T> = ToValidate<T> & {
 //     ? Predicates<T[TKey]>
 //     : (value: T[TKey]) => boolean;
 // };
+export type PickKeyLevelType<T, TKey> = TKey extends keyof T
+  ? T
+  : PickKeyLevelType<T[keyof T], TKey>;
 
-type PredicateFunc<TRoot, T, TKey extends keyof T> = (
+export type PickValueType<T, TKey> = TKey extends keyof T
+  ? Pick<T, TKey>
+  : PickValueType<T[keyof T], TKey>;
+
+let t1: PickValueType<
+  { a: { b: { c: { d: number } } }; a1: number; a2: string },
+  "a1"
+>;
+
+export type PredicateFunc<TRoot, T, TKey extends keyof T> = (
   value: T[TKey],
   validatorState?: ToValidate<TRoot>
 ) => boolean;
 
+export type PredicateDep<TRoot, T, TKey extends keyof T> = {
+  predicate: PredicateFunc<TRoot, T, TKey>;
+  validatorDep: (
+    v: ToValidateValue<T, TKey>
+  ) => (vInstance: ToValidate<T>) => void;
+};
+
 type PredicateValueEntry<TRoot, T, TKey extends keyof T> = {
   [predKey: string]:
     | PredicateFunc<TRoot, T, TKey>
-    | {
-        getters: any;
-        predicate: any;
-        validatorHelper: any;
-      }
+    | PredicateDep<TRoot, T, TKey>
     | boolean
     | undefined;
 };
-interface PredicateValueEntryExt<TRoot, T, TKey extends keyof T>
+export interface PredicateValueEntryExt<TRoot, T, TKey extends keyof T>
   extends PredicateValueEntry<TRoot, T, TKey> {
   $error?: boolean;
 }
@@ -220,16 +240,21 @@ const initValidationTree = (
   if (isLeaf(obj)) {
     let wrappedPredicates: any = {};
 
+    //Initializing the reactive object
+    let reactiveLeaf = reactive<{ value: any; validator: any }>({
+      value: null,
+      validator: null,
+    });
+
     for (let predKey in predicates) {
       if (typeof predicates[predKey] === "function") {
         wrappedPredicates[predKey] = (leafValue: any) =>
           predicates[predKey](leafValue, validatorState.value);
       } else {
-        const { getters, validatorHelper, predicate } = predicates[predKey];
+        const { validatorDep, predicate } = predicates[predKey];
 
         console.log("not a function", {
-          getters,
-          validatorHelper,
+          validatorDep,
           predicate,
           validatorState,
         });
@@ -238,25 +263,21 @@ const initValidationTree = (
 
         watch(validatorState, (cur, prev) => {
           console.log({ cur, prev });
-
-          const depRef = getters(cur);
-          console.log({ depRef });
           //Injecting the validator instance
-          validatorHelper(validatorState.value);
+          validatorDep(reactiveLeaf)(validatorState.value);
         });
       }
     }
 
-    let res = reactive({
-      value: obj,
-      validator: {
-        $error: undefined,
-        ...wrappedPredicates,
-      },
-    });
+    //Inserting the initialized version of the current reactive leaf
+    reactiveLeaf.value = obj;
+    reactiveLeaf.validator = {
+      $error: undefined,
+      ...wrappedPredicates,
+    };
 
     watch(
-      () => res.value,
+      () => reactiveLeaf.value,
       (curVal) => {
         let predResult = true;
         for (let key in wrappedPredicates) {
@@ -265,11 +286,11 @@ const initValidationTree = (
             break;
           }
         }
-        res.validator.$error = !predResult;
+        reactiveLeaf.validator.$error = !predResult;
       }
     );
 
-    return res;
+    return reactiveLeaf;
   }
 
   let result: any = {};
@@ -312,6 +333,21 @@ const getUpdatedObjToValidateAux = (node: any) => {
   }
 
   return plainSubTree;
+};
+
+export const runValidators = (toValidate: any, once = false) => {
+  for (let predKey in toValidate.validator) {
+    if (predKey === "$error") continue;
+    if (once && toValidate.validator.$error !== undefined) {
+      continue;
+    }
+    const predResult = toValidate.validator[predKey](toValidate.value);
+    if (!predResult) {
+      toValidate.validator.$error = !predResult;
+      return;
+    }
+    toValidate.validator.$error = predResult;
+  }
 };
 
 // const visitTree = (objToVisit: any, predicates: any) => {

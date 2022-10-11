@@ -1,5 +1,5 @@
-import { watch } from "vue";
-
+import { watch, UnwrapNestedRefs } from "vue";
+import { runValidators, ToValidate } from "./useValidator";
 // eslint-disable-next-line
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/im;
@@ -35,7 +35,7 @@ export const required = (value: any) => {
 // else return false;
 //};
 
-export const requiredIf = (getter: (validator: any) => any): any => {
+export function requiredIf<T>(getter: (validator: any) => any): any {
   let unwatchFunc: any = null;
   let _reactiveFrom: any, _reactiveDep: any;
 
@@ -68,40 +68,49 @@ export const requiredIf = (getter: (validator: any) => any): any => {
     if (_reactiveDep.validator.$error) return true;
     return required(v);
   };
-};
+}
 
-export const requiredIf2 = (getter: (validator: any) => any): any => {
-  let unwatchFunc: any = null;
-  let _reactiveDep: any = null;
-  const decoratedGetter = (theValidator: any): any => {
-    const { reactiveFrom, reactiveDep } = getter(theValidator);
-    _reactiveDep = reactiveDep;
-    //Called deferred
-    unwatchFunc = watch(
-      () => reactiveDep.validator.$error,
-      (newVal, oldVal) => {
-        console.log("requiredDep has error?", { newVal, oldVal });
-        if (newVal) {
-          reactiveFrom.validator.$error = false;
-        } else {
-          reactiveFrom.validator.$error = !required(reactiveFrom.value);
-        }
-      }
-    );
-    return getter;
-  };
-  return (vInstance: any): any => {
-    console.log("requiredIf2 called!", { vInstance });
-    unwatchFunc && unwatchFunc();
-    //Observing the dependency
-    decoratedGetter(vInstance);
-
-    return (v: any, v1: any) => {
-      if (_reactiveDep.validator.$error) return true;
+//IMP: up to now there is no elegant way to recursevely pick a nested prop... (but there is a lib out there!)
+export function requiredIf2<T>(getter: (validator: any) => any): any {
+  return {
+    predicate: (v: any, v1?: any): boolean => {
+      console.log("predicate called!", { v, v1 });
+      if (!v1) return true;
+      const reactiveDep = getter(v1) as any;
+      const validator = reactiveDep.validator;
+      //Running all validators
+      runValidators(reactiveDep, true);
+      if (validator.$error) return true;
       return required(v);
-    };
+    },
+    validatorDep: (reactiveFrom: any): any => {
+      let unwatchFunc: any = null;
+      const decoratedGetter = (theValidator: any): any => {
+        const reactiveDep = getter(theValidator) as any;
+        //Called deferred
+        unwatchFunc = watch(
+          () => reactiveDep.validator.$error,
+          (newVal, oldVal) => {
+            console.log("requiredDep has error?", { newVal, oldVal });
+            if (newVal) {
+              reactiveFrom.validator.$error = false;
+            } else {
+              reactiveFrom.validator.$error = !required(reactiveFrom.value);
+            }
+          }
+        );
+        return getter;
+      };
+
+      return (vInstance: ToValidate<T>): any => {
+        console.log("requiredIf2 called!", { vInstance });
+        unwatchFunc && unwatchFunc();
+        //Observing the dependency
+        decoratedGetter(vInstance);
+      };
+    },
   };
-};
+}
 
 /** Email validation via regex. In case the provided value is empty, it will be evauluated as valid */
 export const email = (value: string) => {
