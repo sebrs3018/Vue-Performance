@@ -64,23 +64,17 @@ type UsableValidator<T> = ToValidate<T> & {
   getUpdatedObjToValidate: () => T;
 };
 
-/* IN Predicates */
-// type PredicateValue<T, TKey extends keyof T> = {
-//   [predKey: string]: T[TKey] extends object
-//     ? Predicates<T[TKey]>
-//     : (value: T[TKey]) => boolean;
-// };
 export type PickKeyLevelType<T, TKey> = TKey extends keyof T
   ? T
   : PickKeyLevelType<T[keyof T], TKey>;
 
 export type PickValueType<T, TKey> = TKey extends keyof T
-  ? Pick<T, TKey>
+  ? T[TKey]
   : PickValueType<T[keyof T], TKey>;
 
 let t1: PickValueType<
   { a: { b: { c: { d: number } } }; a1: number; a2: string },
-  "a1"
+  "a"
 >;
 
 export type PredicateFunc<TRoot, T, TKey extends keyof T> = (
@@ -113,64 +107,6 @@ type PredicateValue<TRoot, T, TKey extends keyof T> = T[TKey] extends object
 
 type Predicates<TRoot, T> = {
   [K in keyof T]: PredicateValue<TRoot, T, K>;
-};
-
-// const p: PredicateValue<
-//   { name: string; city: { place: string; zip: string } },
-//   "name"
-// > = {
-//   l1: (val) => true,
-// };
-// const p1: PredicateValue<
-//   { name: string; city: { place: string; zip: string } },
-//   "city"
-// > = {
-//   place: {
-//     ll: (val: string) => true,
-//   },
-//   zip: {
-//     ll: (val: string) => true,
-//   },
-// };
-// const p0: Predicates<{ name: string; city: { place: string; zip: string } }> = {
-//   name: {
-//     l1: (val) => true,
-//   },
-//   city: {
-//     place: {
-//       l1: (val) => true,
-//     },
-//     zip: {
-//       l1: (val) => true,
-//     },
-//   },
-// };
-
-/* OUT Predicates */
-type PredicateEntry<TRoot, T, K extends keyof T> = Predicates<TRoot, T>[K];
-// const pEntry: PredicateEntry<
-//   { name: string; city: { place: string; zip: string } },
-//   "city"
-// > = {
-//   place: {
-//     l1: (val) => true,
-//   },
-//   zip: {
-//     l1: (val) => true,
-//   },
-// };
-
-// type PredicateEntryExtended<T, K extends keyof T> = PredicateEntry<T, K> & {
-//   /** This value is null in only during the initialization period! */
-//   $error: boolean;
-// };
-type PredicateEntryExtended<TRoot, T, K extends keyof T> = PredicateValue<
-  TRoot,
-  T,
-  K
-> & {
-  /** This value is null in only during the initialization period! */
-  $error: boolean;
 };
 
 /**

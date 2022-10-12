@@ -43,7 +43,9 @@ const { requestData, validate, getUpdatedObjToValidate } = useValidator(
   {
     requestData: {
       userPhone: {
-        immWatcher: requiredIf2((_validator) => _validator.requestData.privacy),
+        immWatcher: requiredIf2<RequestData>(
+          (_validator) => _validator.requestData.privacy
+        ),
         phone,
       },
       userEmail: {

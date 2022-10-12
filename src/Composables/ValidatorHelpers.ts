@@ -1,5 +1,10 @@
 import { watch, UnwrapNestedRefs } from "vue";
-import { runValidators, ToValidate } from "./useValidator";
+import {
+  runValidators,
+  ToValidate,
+  ToValidateEntry,
+  ToValidateValue,
+} from "./useValidator";
 // eslint-disable-next-line
 const EMAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/im;
@@ -70,8 +75,12 @@ export function requiredIf<T>(getter: (validator: any) => any): any {
   };
 }
 
+//type t = { t: number, t2: number, t3: { t4: number, t5: { t6: number } } }
+//type getterFunc<T, T1> = (val: ToValidate<T>) => ToValidateEntry<T1, keyof T1>;
+//let t43: getterFunc<t, { t3: { t4: number, t5: { t6: number } } } > = (v) => v.t3 ;
+
 //IMP: up to now there is no elegant way to recursevely pick a nested prop... (but there is a lib out there!)
-export function requiredIf2<T>(getter: (validator: any) => any): any {
+export function requiredIf2<T>(getter: (validator: ToValidate<T>) => any): any {
   return {
     predicate: (v: any, v1?: any): boolean => {
       console.log("predicate called!", { v, v1 });
@@ -85,7 +94,7 @@ export function requiredIf2<T>(getter: (validator: any) => any): any {
     },
     validatorDep: (reactiveFrom: any): any => {
       let unwatchFunc: any = null;
-      const decoratedGetter = (theValidator: any): any => {
+      const decoratedGetter = (theValidator: ToValidate<T>): any => {
         const reactiveDep = getter(theValidator) as any;
         //Called deferred
         unwatchFunc = watch(
