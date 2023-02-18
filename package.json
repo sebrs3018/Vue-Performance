@@ -7,7 +7,7 @@
     "serve": "vue-cli-service serve --mode development --port 3000",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "http-server": "cd ./dist && http-server --gzip",
+    "http-server": "cd ./dist && http-server --gzip -c31536000",
     "serve-prod": "SET NODE_OPTIONS=--openssl-legacy-provider && workbox generateSW workbox-config.js && vue-cli-service serve --mode production"
   },
   "dependencies": {
@@ -29,12 +29,14 @@
     "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-typescript": "^11.0.0",
     "babel-eslint": "^10.0.3",
+    "compression-webpack-plugin": "^10.0.0",
     "eslint": "^8.23.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-vue": "^9.5.0",
     "prettier": "^2.7.1",
     "typescript": "^4.8.3",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "workbox-cli": "^6.5.4"
   },
   "postcss": {
     "plugins": {
