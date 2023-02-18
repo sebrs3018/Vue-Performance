@@ -1,3 +1,5 @@
+//IMP: Fondamentale servire i file compressi almeno in gzip (sarebbe top servirli in broli )
+const CompressionPlugin = require("compression-webpack-plugin");
 module.exports = {
   pages: {
     index: {
@@ -12,8 +14,15 @@ module.exports = {
       filename: "profile.html" /* output name of the file */,
       title: "My profile",
     },
+    coreVitals: {
+      entry: "src/scripts/coreVitals.ts" /* js entry point */,
+      template: "public/core-vitals.html" /* html template entry point */,
+      filename: "core-vitals.html" /* output name of the file */,
+      title: "Core Vitals",
+    },
   },
   configureWebpack: {
+    plugins: [new CompressionPlugin()],
     optimization: {
       splitChunks: {
         chunks: "all",
