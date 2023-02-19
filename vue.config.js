@@ -31,6 +31,12 @@ module.exports = defineConfig({
         {
           rel: "preload",
           include: "initial",
+          as(entry) {
+            if (/\.css$/.test(entry)) return "style";
+            if (/\.woff$/.test(entry)) return "font";
+            if (/\.(png|jpg|jpeg)$/.test(entry)) return "image";
+            return "script";
+          },
         },
       ])
       .after("html");
