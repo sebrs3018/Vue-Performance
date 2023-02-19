@@ -1,6 +1,9 @@
 //IMP: Fondamentale servire i file compressi almeno in gzip (sarebbe top servirli in broli )
+const { defineConfig } = require("@vue/cli-service");
 const CompressionPlugin = require("compression-webpack-plugin");
-module.exports = {
+const PreloadWebpackPlugin = require("@vue/preload-webpack-plugin");
+
+module.exports = defineConfig({
   pages: {
     index: {
       entry: "src/main.ts" /* js entry point */,
@@ -20,6 +23,17 @@ module.exports = {
       filename: "core-vitals.html" /* output name of the file */,
       title: "Core Vitals",
     },
+  },
+  chainWebpack(config) {
+    config
+      .plugin("preload")
+      .use(PreloadWebpackPlugin, [
+        {
+          rel: "preload",
+          include: "initial",
+        },
+      ])
+      .after("html");
   },
   configureWebpack: {
     plugins: [new CompressionPlugin()],
@@ -48,4 +62,4 @@ module.exports = {
   },
   transpileDependencies: true,
   lintOnSave: false,
-};
+});
