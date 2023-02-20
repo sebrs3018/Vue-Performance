@@ -25,6 +25,24 @@ module.exports = defineConfig({
     },
   },
   chainWebpack(config) {
+    const imgRule = config.module.rule("images");
+    imgRule
+      .test(/\.(gif|png|jpe?g|svg)$/i)
+      .use("file-loader")
+      .loader("image-webpack-loader")
+      .tap((options) => {
+        const ret = options || {};
+        ret.pngquant = {
+          quality: "65-90",
+          speed: 4,
+        };
+        ret.webp = {
+          quality: 75,
+        };
+
+        return ret;
+      });
+
     config
       .plugin("preload")
       .use(PreloadWebpackPlugin, [
