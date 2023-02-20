@@ -11,12 +11,9 @@
     "serve-prod": "SET NODE_OPTIONS=--openssl-legacy-provider && workbox generateSW workbox-config.js && vue-cli-service serve --mode production"
   },
   "dependencies": {
-    "@vuelidate/core": "^2.0.0-alpha.44",
-    "@vuelidate/validators": "^2.0.0-alpha.31",
     "autoprefixer": "^10",
     "core-js": "^3.8.3",
     "express": "^4.18.1",
-    "http2": "^3.3.7",
     "postcss": "^8",
     "spdy": "^4.0.2",
     "tailwindcss": "^3",
@@ -37,8 +34,9 @@
     "eslint": "^8.23.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-vue": "^9.5.0",
-    "image-webpack-loader": "^8.1.0",
+    "image-minimizer-webpack-plugin": "^3.8.1",
     "prettier": "^2.7.1",
+    "sharp": "^0.31.3",
     "typescript": "^4.8.3",
     "vue-cli-plugin-tailwind": "^3.0.0",
     "vue-template-compiler": "^2.6.11",

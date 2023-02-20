@@ -2,6 +2,7 @@
 const { defineConfig } = require("@vue/cli-service");
 const CompressionPlugin = require("compression-webpack-plugin");
 const PreloadWebpackPlugin = require("@vue/preload-webpack-plugin");
+const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 
 module.exports = defineConfig({
   pages: {
@@ -25,24 +26,6 @@ module.exports = defineConfig({
     },
   },
   chainWebpack(config) {
-    const imgRule = config.module.rule("images");
-    imgRule
-      .test(/\.(gif|png|jpe?g|svg)$/i)
-      .use("file-loader")
-      .loader("image-webpack-loader")
-      .tap((options) => {
-        const ret = options || {};
-        ret.pngquant = {
-          quality: "65-90",
-          speed: 4,
-        };
-        ret.webp = {
-          quality: 75,
-        };
-
-        return ret;
-      });
-
     config
       .plugin("preload")
       .use(PreloadWebpackPlugin, [
@@ -52,7 +35,7 @@ module.exports = defineConfig({
           as(entry) {
             if (/\.css$/.test(entry)) return "style";
             if (/\.woff$/.test(entry)) return "font";
-            if (/\.(png|jpg|jpeg)$/.test(entry)) return "image";
+            if (/\.(png|jpg|jpeg|webp)$/.test(entry)) return "image";
             return "script";
           },
         },
@@ -62,6 +45,55 @@ module.exports = defineConfig({
   configureWebpack: {
     plugins: [new CompressionPlugin()],
     optimization: {
+      minimizer: [
+        "...",
+        new ImageMinimizerPlugin({
+          minimizer: {
+            implementation: ImageMinimizerPlugin.sharpMinify,
+            options: {
+              encodeOptions: {
+                jpeg: {
+                  // https://sharp.pixelplumbing.com/api-output#jpeg
+                  quality: 100,
+                },
+                webp: {
+                  // https://sharp.pixelplumbing.com/api-output#webp
+                  lossless: true,
+                },
+                avif: {
+                  // https://sharp.pixelplumbing.com/api-output#avif
+                  lossless: true,
+                },
+
+                // png by default sets the quality to 100%, which is same as lossless
+                // https://sharp.pixelplumbing.com/api-output#png
+                png: {},
+
+                // gif does not support lossless compression at all
+                // https://sharp.pixelplumbing.com/api-output#gif
+                gif: {},
+              },
+            },
+          },
+          generator: [
+            {
+              // You can apply generator using `?as=webp`, you can use any name and provide more options
+              preset: "webp",
+              implementation: ImageMinimizerPlugin.sharpGenerate,
+              options: {
+                encodeOptions: {
+                  webp: {
+                    lossless: true,
+                    quality: 60,
+                    alphaQuality: 80,
+                    force: false,
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      ],
       splitChunks: {
         chunks: "all",
         maxInitialRequests: Infinity,
