@@ -2,6 +2,7 @@
 //@ts-ignore
 import preloadedBg from "../../img/huge_background_img.jpg";
 //Retrieving the url of the preloaded bg
+//Caveat: if thje urls are different, then the preload won't have effect (= we are downloading from different sources...)
 const img = preloadedBg;
 </script>
 <template>
