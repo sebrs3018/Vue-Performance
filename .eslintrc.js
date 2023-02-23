@@ -1,8 +1,6 @@
 module.exports = {
-  'extends': [
-    '@vue/typescript'
-  ],
+  extends: ["@vue/typescript", "prettier"],
   parserOptions: {
-    parser: '@typescript-eslint/parser'
-  }
-}
+    parser: "@typescript-eslint/parser",
+  },
+};

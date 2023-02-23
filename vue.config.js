@@ -25,6 +25,9 @@ module.exports = defineConfig({
       title: "Core Vitals",
     },
   },
+
+  /* More info about preloadPlugin: https://github.com/vuejs/preload-webpack-plugin */
+
   chainWebpack(config) {
     config
       .plugin("preload")
@@ -32,6 +35,7 @@ module.exports = defineConfig({
         {
           rel: "preload",
           include: "initial",
+          fileBlacklist: [/\.map/, /\.whatever/, /\.js/, /\.css/],
           as(entry) {
             if (/\.css$/.test(entry)) return "style";
             if (/\.woff$/.test(entry)) return "font";
@@ -41,6 +45,16 @@ module.exports = defineConfig({
         },
       ])
       .after("html");
+
+    /*     config
+      .plugin("prefetch")
+      .use(PreloadWebpackPlugin, [
+        {
+          rel: "prefetch",
+          include: "initial"
+        },
+      ])
+      .after("html"); */
   },
   configureWebpack: {
     plugins: [new CompressionPlugin()],
