@@ -1,8 +1,6 @@
-import Vue from "vue";
-import App from "./App.vue";
-import './assets/tailwind.css'
-
-Vue.config.productionTip = false;
+import { createApp } from "vue";
+import App from "./MainApp.vue";
+import "./assets/tailwind.css";
 
 /* Added a service worker to implement caching capabilities using workbox */
 if ("serviceWorker" in navigator) {
@@ -11,6 +9,4 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-new Vue({
-  render: (h) => h(App),
-}).$mount("#app");
+createApp(App).mount("#app");

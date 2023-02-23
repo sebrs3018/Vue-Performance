@@ -1,7 +1,5 @@
-import Vue from "vue";
+import { createApp } from "vue";
 import Profile from "../Views/Profile.vue";
-
-Vue.config.productionTip = false;
 
 /* Added a service worker to implement caching capabilities using workbox */
 if ("serviceWorker" in navigator) {
@@ -10,6 +8,4 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-new Vue({
-  render: (h) => h(Profile),
-}).$mount("#profile");
+createApp(Profile).mount("#profile");

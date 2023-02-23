@@ -1,13 +1,5 @@
 <script lang="ts" setup>
 //import useValidatorState from "../components/Mixins/ValidatorMixin";
-import {
-  defineComponent,
-  ref,
-  onBeforeMount,
-  watch,
-  computed,
-  nextTick,
-} from "vue";
 
 interface BaseCheckboxProps {
   validator?: any;
@@ -47,9 +39,8 @@ function handleChange(event: Event) {
 <template>
   <div :class="customWrapperClasses" @click="handleChange">
     <input
-      :id="$attrs.id"
+      v-bind="$attrs"
       type="checkbox"
-      :name="$attrs.name"
       :class="hasError() ? 'has-error' : ''"
       :checked="value"
     />
@@ -59,7 +50,6 @@ function handleChange(event: Event) {
         'f-12 f-sm-14',
         customLabelClasses,
       ]"
-      :for="$attrs.id"
     >
       <slot name="label"></slot>
     </label>
