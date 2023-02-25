@@ -6,7 +6,7 @@ import preloadedBg from "../../img/huge_background_img.jpeg?as=webp&w=500";
 const img = preloadedBg;
 </script>
 <template>
-  <div class="flex flex-col items-center mx-10">
+  <div class="flex flex-col items-center m-10">
     <h1 class="text-xl mb-2">Core Vitals</h1>
     <h2 class="text-lg">Apply prefetch to the following image</h2>
 
@@ -89,8 +89,8 @@ Note: in order to make this work, we have to disable the preloading  -->
 @import "../../assets/tailwind.css";
 
 #container-with-bg {
-  width: 500px;
-  height: 281px;
+  width: 100%;
+  height: 100px;
   background-size: cover;
 }
 </style>
