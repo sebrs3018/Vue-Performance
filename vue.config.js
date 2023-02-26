@@ -1,8 +1,20 @@
 //IMP: Fondamentale servire i file compressi almeno in gzip (sarebbe top servirli in broli )
 const { defineConfig } = require("@vue/cli-service");
+
 const CompressionPlugin = require("compression-webpack-plugin");
 const PreloadWebpackPlugin = require("@vue/preload-webpack-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
+const WebpackCriticalCSSInliner = require("webpack-critical-css-inliner");
+
+const sharp = require("sharp");
+[300, 400, 500].forEach((size) => {
+  sharp("./public/ferret.webp")
+    .resize(size, null)
+    .toFile(`./public/ferret_${size}.webp`, function (err) {
+      // output.jpg is a 300 pixels wide and 200 pixels high image
+      // containing a scaled and cropped version of input.jpg
+    });
+});
 
 module.exports = defineConfig({
   pages: {
@@ -26,9 +38,37 @@ module.exports = defineConfig({
     },
   },
 
-  /* More info about preloadPlugin: https://github.com/vuejs/preload-webpack-plugin */
-
   chainWebpack(config) {
+    config
+      .plugin("critical-css-inliner")
+      .use(WebpackCriticalCSSInliner, [
+        {
+          // Your entrypoint
+          base: "dist/",
+
+          // HTML source file
+          src: "core-vitals.html",
+
+          // HTML target file
+          target: "core-vitals-critical.html",
+
+          // Add Google Fonts to critical CSS
+          inlineGoogleFonts: true,
+
+          // Minify all styles
+          minify: true,
+
+          // ignore styles from the following stylesheets
+          ignoreStylesheets: [/bootstrap/],
+
+          // inline styles with the following CSS rules
+          whitelist: /#foo|\.bar/,
+        },
+      ])
+
+      .after("html");
+
+    /* More info about preloadPlugin: https://github.com/vuejs/preload-webpack-plugin */
     config
       .plugin("preload")
       .use(PreloadWebpackPlugin, [

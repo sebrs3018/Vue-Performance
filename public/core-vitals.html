@@ -14,6 +14,7 @@
         rel="stylesheet">
 
     <title>Core Vitals</title>
+
 </head>
 
 <body>
@@ -24,8 +25,16 @@
 
     <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 200px;">
         <h1 style="font-size: 20px; font-weight: 400; margin: 15px 0; padding: 0;"> In a not Vue application</h1>
-        <img src="<%= BASE_URL %>ferret.webp" fetchpriority="high" width="300" height="auto"
-            style="margin-top: 30px;" />
+
+        <!-- Art direction: we are combining the power of prefetching with art direction strategy to prefetch the most appropriate image to the current viewport -->
+        <picture>
+            <source media="(max-width: 576px)" srcset="<%= BASE_URL %>ferret_300.webp" />
+            <source media="(min-width: 576px)" srcset="<%= BASE_URL %>ferret_500.webp" />
+            <img fetchpriority="high" src="<%= BASE_URL %>furetto_300.webp" alt="A cute ferret face" />
+        </picture>
+
+        <!-- <img src="<%= BASE_URL %>furetto.webp" fetchpriority="high" width="300" height="auto"
+            style="margin-top: 30px;" /> -->
         <img src="<%= BASE_URL %>albino-ferret.webp" fetchpriority="low" width="200" height="auto"
             style="margin-top: 100px;" />
     </div>
