@@ -13,6 +13,12 @@
         href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100;200;300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <style>
+        body {
+            font-family: 'Libre Franklin', sans-serif;
+        }
+    </style>
+
     <title>Core Vitals</title>
 
 </head>
@@ -23,20 +29,34 @@
             enabled. Please enable it to continue.</strong>
     </noscript>
 
-    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 200px;">
-        <h1 style="font-size: 20px; font-weight: 400; margin: 15px 0; padding: 0;"> In a not Vue application</h1>
+    <div
+        style="display: flex; flex-direction: column; align-items: center; margin-bottom: 200px; margin-right: 30px; margin-left: 30px;">
+        <h1 style="font-size: 1.25rem; font-weight: 400; margin: 30px 0; padding: 0;"> In a not Vue application</h1>
 
         <!-- Art direction: we are combining the power of prefetching with art direction strategy to prefetch the most appropriate image to the current viewport -->
-        <picture>
-            <source media="(max-width: 576px)" srcset="<%= BASE_URL %>ferret_300.webp" />
-            <source media="(min-width: 576px)" srcset="<%= BASE_URL %>ferret_500.webp" />
-            <img fetchpriority="high" src="<%= BASE_URL %>furetto_300.webp" alt="A cute ferret face" />
+        <picture style="margin-top: 15px;">
+            <source media="(max-width: 576px)"
+                srcset="<%= BASE_URL %>staticImg/ferret_300_1x.webp 1x, <%= BASE_URL %>staticImg/ferret_300_2x.webp 2x, <%= BASE_URL %>staticImg/ferret_300_3x.webp 3x" />
+            <source media="(min-width: 576px)" srcset="<%= BASE_URL %>staticImg/ferret_300_2x.webp" />
+            <img fetchpriority="high" src="<%= BASE_URL %>staticImg/furetto_300_1x.webp" alt="A cute ferret face"
+                width="300" height="199" />
         </picture>
+        <p style="margin-top: 20px; font-size: 1.125rem;">This will be the LCP element of the page. For this reason, we
+            should try to render it the fastest way
+            possible</p>
 
-        <!-- <img src="<%= BASE_URL %>furetto.webp" fetchpriority="high" width="300" height="auto"
-            style="margin-top: 30px;" /> -->
-        <img src="<%= BASE_URL %>albino-ferret.webp" fetchpriority="low" width="200" height="auto"
-            style="margin-top: 100px;" />
+        <picture style="margin-top: 100px;">
+            <source media="(max-width: 576px)"
+                srcset="<%= BASE_URL %>staticImg/albino-ferret_200_1x.webp 1x, <%= BASE_URL %>staticImg/albino-ferret_200_2x.webp 2x, <%= BASE_URL %>staticImg/albino-ferret_200_3x.webp 3x" />
+            <source media="(min-width: 576px)" srcset="<%= BASE_URL %>staticImg/albino-ferret_200_2x.webp" />
+            <img src="<%= BASE_URL %>staticImg/albino-ferret_200_1x.webp" fetchpriority="low" width="200" height="142"
+                alt="An albino ferret, so rare!" />
+        </picture>
+        <p style="margin-top: 20px; font-size: 1.125rem;">This is just a cute ferret, nevertheless, if not handled
+            properly, it could delay
+            the render of the LCP
+            element!</p>
+
     </div>
 
     <div id="app">

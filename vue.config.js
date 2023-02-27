@@ -7,14 +7,59 @@ const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const WebpackCriticalCSSInliner = require("webpack-critical-css-inliner");
 
 const sharp = require("sharp");
-[300, 400, 500].forEach((size) => {
-  sharp("./public/ferret.webp")
-    .resize(size, null)
-    .toFile(`./public/ferret_${size}.webp`, function (err) {
-      // output.jpg is a 300 pixels wide and 200 pixels high image
-      // containing a scaled and cropped version of input.jpg
+
+const baseStaticImagePath = "./public/staticImg";
+const baseDims = {
+  ferret: {
+    sizes: [300],
+    format: ".webp",
+  },
+  "albino-ferret": {
+    sizes: [200],
+    format: ".webp",
+  },
+};
+
+for (const fileName in baseDims) {
+  const { sizes, format } = baseDims[fileName];
+  //Iterating over each size array of the image
+  sizes.forEach((size) => {
+    //Creating 3 different versions of the same image which are density-pixel compliant
+    [size, size * 2, size * 3].forEach((dp, index) => {
+      const imgSrc = `${baseStaticImagePath}/${fileName}${format}`;
+      //Removing the extension
+      const srcWithoutExtension = `${baseStaticImagePath}/${fileName}`;
+      sharp(imgSrc)
+        .resize(dp, null)
+        .toFile(
+          `${srcWithoutExtension}_${size}_${index + 1}x${format}`,
+          function (err) {
+            // output.jpg is a 300 pixels wide and 200 pixels high image
+            // containing a scaled and cropped version of input.jpg
+          }
+        );
     });
+  });
+}
+
+/*
+[200, 300, 500].forEach((size) => {
+  [
+    "./public/staticImg/ferret.webp",
+    "./public/staticImg/albino-ferret.webp",
+  ].forEach((imgSrc) => {
+    const format = ".webp";
+    //Removing the extension
+    const srcWithoutExtension = imgSrc.split(format)[0];
+    sharp(imgSrc)
+      .resize(size, null)
+      .toFile(`${srcWithoutExtension}_${size}${format}`, function (err) {
+        // output.jpg is a 300 pixels wide and 200 pixels high image
+        // containing a scaled and cropped version of input.jpg
+      });
+  });
 });
+*/
 
 module.exports = defineConfig({
   pages: {

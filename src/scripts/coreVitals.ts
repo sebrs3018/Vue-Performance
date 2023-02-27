@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import CoreVitals from "../Views/CoreVitals/CoreVitals.vue";
+import CoreVitalsApp from "../Views/CoreVitals/CoreVitalsApp.vue";
 
 /* Added a service worker to implement caching capabilities using workbox */
 if ("serviceWorker" in navigator) {
@@ -8,4 +8,4 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-createApp(CoreVitals).mount("#app");
+createApp(CoreVitalsApp).mount("#app");
