@@ -13,8 +13,9 @@
         href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100;200;300;400;500;600;700;800&display=swap"
         rel="stylesheet"> -->
 
-    <link rel=preload href="<%= BASE_URL %>staticImg/furetto_300_1x.webp" as=image
-        imagesrcset="<%= BASE_URL %>staticImg/ferret_300_1x.webp 1x, <%= BASE_URL %>staticImg/ferret_300_2x.webp 2x, <%= BASE_URL %>staticImg/ferret_300_3x.webp 3x"">
+    <!-- Preloading the bg-image which will be the LCP element! -->
+    <!-- <link rel=preload href="<%= BASE_URL %>staticImg/furetto_300_1x.webp" as=image
+        imagesrcset="<%= BASE_URL %>staticImg/ferret_300_1x.webp 1x, <%= BASE_URL %>staticImg/ferret_300_2x.webp 2x, <%= BASE_URL %>staticImg/ferret_300_3x.webp 3x"> -->
 
     <style>
         @font-face {
@@ -29,17 +30,13 @@
         }
 
         /* #preloaded-ferret-bg {
-            background-image: 
-            -webkit-image-set(
-                url(" <%=BASE_URL %>staticImg/ferret_300_1x.webp 1x") 1x,
-    url("<%= BASE_URL %>staticImg/ferret_300_2x.webp") 2x
-        );
+            background-image:
+                -webkit-image-set(url(" <%=BASE_URL %>staticImg/ferret_300_1x.webp 1x") 1x,
+                    url("<%= BASE_URL %>staticImg/ferret_300_2x.webp") 2x);
         } */
+    </style>
 
-
-        </style>
-
-        <title>Core Vitals</title>
+    <title>Core Vitals</title>
 
 </head>
 
@@ -57,7 +54,6 @@
         <div id="preloaded-ferret-bg" style="width: 300px; height: 199px;">
         </div>
         <p style="font-size: 1.125rem;">This background image was preloaded</p> -->
-
 
     <!-- Art direction: we are combining the power of prefetching with art direction strategy to prefetch the most appropriate image to the current viewport -->
     <picture style="margin-top: 15px;">
