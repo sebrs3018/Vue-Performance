@@ -7,23 +7,29 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
 
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect"
+
+    <!-- TODO => LCP element: can we improve the font loading? -->
+    <!-- 
+        Hint: rel="preconnect" 
+    -->
+    <link href="https://fonts.googleapis.com">
+    <link href="https://fonts.gstatic.com" crossorigin>
+    <link
         href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100;200;300;400;500;600;700;800&display=swap"
-        rel="stylesheet"> -->
+        rel="stylesheet">
 
     <!-- Preloading the bg-image which will be the LCP element! -->
+    <!-- https://developer.mozilla.org/en-US/docs/Web/CSS/image/image-set#browser_compatibility -->
     <!-- <link rel=preload href="<%= BASE_URL %>staticImg/furetto_300_1x.webp" as=image
         imagesrcset="<%= BASE_URL %>staticImg/ferret_300_1x.webp 1x, <%= BASE_URL %>staticImg/ferret_300_2x.webp 2x, <%= BASE_URL %>staticImg/ferret_300_3x.webp 3x"> -->
 
     <style>
-        @font-face {
+        /* @font-face { 
             font-family: 'Libre Franklin';
             font-style: regular;
             font-weight: 400;
             src: local('Libre Franklin'), local('libre-franklin')
-        }
+        } */
 
         body {
             font-family: 'Libre Franklin', sans-serif;
@@ -58,7 +64,6 @@
         <!-- <div id="preloaded-ferret-bg" style="width: 300px; height: 199px;">
         </div>
         <p style="font-size: 1.125rem;">This background image was preloaded</p> -->
-
 
 
         <!-- Art direction: we are combining the power of prefetching with art direction strategy to prefetch the most appropriate image to the current viewport -->
