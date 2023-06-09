@@ -4,7 +4,7 @@ const { defineConfig } = require("@vue/cli-service");
 const CompressionPlugin = require("compression-webpack-plugin");
 const PreloadWebpackPlugin = require("@vue/preload-webpack-plugin");
 const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
-const WebpackCriticalCSSInliner = require("webpack-critical-css-inliner");
+//const WebpackCriticalCSSInliner = require("webpack-critical-css-inliner");
 
 const sharp = require("sharp");
 
@@ -84,6 +84,7 @@ module.exports = defineConfig({
   },
 
   chainWebpack(config) {
+    /*
     config
       .plugin("critical-css-inliner")
       .use(WebpackCriticalCSSInliner, [
@@ -110,8 +111,8 @@ module.exports = defineConfig({
           whitelist: /#foo|\.bar/,
         },
       ])
-
       .after("html");
+      */
 
     /* More info about preloadPlugin: https://github.com/vuejs/preload-webpack-plugin */
     config
