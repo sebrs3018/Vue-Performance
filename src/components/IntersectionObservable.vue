@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-const props = defineProps<{ observer: IntersectionObserver | null }>();
+const props = defineProps<{
+  observer: IntersectionObserver | null;
+  isVisible: boolean;
+}>();
 
 //IMP: when we try to get a reference to an element, the name of the variable must natch with the one we are refering to
 const root = ref<HTMLElement | null>(null);
@@ -12,7 +15,10 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div ref="root">
+  <div v-if="!isVisible" ref="root">
+    <slot name="observable" />
+  </div>
+  <div v-else>
     <slot name="observable" />
   </div>
 </template>

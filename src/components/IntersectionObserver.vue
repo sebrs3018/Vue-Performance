@@ -1,19 +1,5 @@
 <script lang="ts" setup>
-import { reactive, onBeforeMount, onBeforeUnmount } from "vue";
-
-// let notOverridableFunc: (s1: string) => void;
-
-// let overridableFunc: {
-//   (s: string): void;
-//   //IMP: if we want to use this notation, we have to set the second param as default or optional value
-//   (s: string, n: number): void;
-// };
-// overridableFunc = (s: string): void => {
-//   console.log(s)
-// }
-// overridableFunc = (s: string, n: number = -1): void => {
-//   console.log(`${s}${n}`);
-// }
+import { reactive, onBeforeMount, onBeforeUnmount, ref, onMounted } from "vue";
 
 const emits = defineEmits<{
   (e: "intersection"): void;
@@ -31,16 +17,15 @@ const props = withDefaults(
 let states = reactive<{
   observer: IntersectionObserver | null;
   root: HTMLElement | null;
-}>({ observer: null, root: null });
-
-// let root = ref<HTMLElement | null>(null);
+  isVisible: boolean;
+}>({ observer: null, root: null, isVisible: false });
 
 const onElementObserved: IntersectionObserverCallback = (entries) => {
   entries.forEach(({ target, isIntersecting }) => {
-    // do something ...
     if (isIntersecting) {
       console.log("Yey, it is visible!");
       emits("intersection");
+      states.isVisible = true;
     }
     if (props.observeOnce && isIntersecting) unobserveTarget(target);
   });
@@ -56,14 +41,17 @@ function disconnectObserver() {
   states.observer.disconnect();
 }
 
-//IMP: there is no created hook in composition API... but there is a beforeMount which is similar!
-onBeforeMount(() => {
-  console.log({ root: states.root });
+const observer = ref<HTMLElement | null>(null);
 
+onBeforeMount(() => {
   states.observer = new IntersectionObserver(onElementObserved, {
     root: null, //if the root is null, then we will check if the target is visible in the doc root!
     threshold: 1.0,
   });
+});
+
+onMounted(() => {
+  console.log("IntersectionObserver onMounted", observer.value);
 });
 
 onBeforeUnmount(() => {
@@ -71,7 +59,9 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div ref="root">
-    <slot name="observer" :observer="states.observer"></slot>
-  </div>
+  <slot
+    name="observer"
+    :observer="states.observer"
+    :is-visible="states.isVisible"
+  ></slot>
 </template>
